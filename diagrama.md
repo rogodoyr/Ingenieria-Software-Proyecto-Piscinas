@@ -54,7 +54,7 @@ graph TD
     AppFront -->|Gestión de Perfiles| ClienteService
     AppFront -->|Asignación de Trabajos| MantencionService
     AppFront -->|Facturación y Productos| VentaService
-    AppFront -->|Ubicación GPS (Leaflet)| RutaService
+    AppFront -->|"Ubicación GPS (Leaflet)"| RutaService
     AppFront -->|Estadísticas globales| DashboardService
 
     %% Relaciones de Microservicios con sus Bases de Datos
