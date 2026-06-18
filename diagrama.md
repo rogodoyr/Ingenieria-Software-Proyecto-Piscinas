@@ -16,13 +16,13 @@ graph TD
     Admin((Administrador / Backoffice)):::actor
 
     %% Aplicaciones Frontend
-    subgraph CapaPresentacion [Capa de Presentación (Frontend)]
+    subgraph CapaPresentacion ["Capa de Presentación (Frontend)"]
         Landing["Landing Page<br/>(/landing-verano)"]:::frontend
         AppFront["App ERP / Dashboard<br/>(/front)"]:::frontend
     end
 
     %% Microservicios Spring Boot
-    subgraph CapaNegocio [Capa de Negocio (Microservicios Spring Boot)]
+    subgraph CapaNegocio ["Capa de Negocio (Microservicios Spring Boot)"]
         AuthService["Auth Service<br/>(Puerto: 3333)"]:::microservice
         ClienteService["Cliente Service<br/>(Puerto: 3334)"]:::microservice
         MantencionService["Mantención Service<br/>(Puerto: 3335)"]:::microservice
@@ -32,7 +32,7 @@ graph TD
     end
 
     %% Bases de datos PostgreSQL
-    subgraph CapaDatos [Capa de Datos (PostgreSQL Docker)]
+    subgraph CapaDatos ["Capa de Datos (PostgreSQL Docker)"]
         AuthDB[(Auth DB<br/>Puerto: 5433)]:::database
         ClienteDB[(Cliente DB<br/>Puerto: 5434)]:::database
         MantencionDB[(Mantención DB<br/>Puerto: 5435)]:::database
@@ -66,7 +66,6 @@ graph TD
     DashboardService --> DashboardDB
 
     %% Interacciones Internas (Inter-Service Communication)
-    %% El Dashboard Service necesita consumir datos de otros servicios para armar sus métricas
     DashboardService -.->|API REST Interna| ClienteService
     DashboardService -.->|API REST Interna| VentaService
     DashboardService -.->|API REST Interna| MantencionService
