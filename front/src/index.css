@@ -1,0 +1,27 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: #0b1326;
+  --color-surface: #131b2e;
+  --color-surface-high: #1d2538;
+  --color-primary: #8ccff0;
+  --color-primary-container: #004d65;
+  --color-secondary: #2ddbde;
+  --color-secondary-container: #004f51;
+  --color-outline: rgba(138, 146, 150, 0.2);
+}
+
+@layer utilities {
+  .pool-glow {
+    box-shadow: 0 4px 20px rgba(0, 210, 255, 0.05);
+  }
+  .glass-card {
+    background: rgba(19, 27, 46, 0.7);
+    backdrop-filter: blur(10px);
+  }
+}
+
+body {
+  background-color: var(--color-background);
+  color: #e1e2e5;
+}

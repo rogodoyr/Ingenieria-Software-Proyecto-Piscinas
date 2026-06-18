@@ -1,0 +1,21 @@
+services:
+  postgresCliente:
+    image: postgres:16-alpine
+    container_name: veranoperfecto-cliente-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: cliente_db
+      POSTGRES_USER: cliente_user
+      POSTGRES_PASSWORD: cliente_pass
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_cliente_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cliente_user -d cliente_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_cliente_data:

@@ -1,0 +1,21 @@
+services:
+  postgresRuta:
+    image: postgres:16-alpine
+    container_name: veranoperfecto-ruta-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ruta_db
+      POSTGRES_USER: ruta_user
+      POSTGRES_PASSWORD: ruta_pass
+    ports:
+      - "5437:5432"
+    volumes:
+      - postgres_ruta_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ruta_user -d ruta_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_ruta_data:

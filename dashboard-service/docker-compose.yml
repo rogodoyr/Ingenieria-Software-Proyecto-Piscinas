@@ -1,0 +1,21 @@
+services:
+  postgresDashboard:
+    image: postgres:16-alpine
+    container_name: veranoperfecto-dashboard-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: dashboard_db
+      POSTGRES_USER: dashboard_user
+      POSTGRES_PASSWORD: dashboard_pass
+    ports:
+      - "5438:5432"
+    volumes:
+      - postgres_dashboard_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dashboard_user -d dashboard_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_dashboard_data:

@@ -1,0 +1,15 @@
+# Ocultar configuraciones del IDE
+.vscode/
+*.code-workspace
+
+# Ocultar dependencias pesadas y binarios
+node_modules/
+.gradle-bin/
+.gradle-bin-new/
+.gradle/
+build/
+target/
+
+# Ocultar pruebas locales y credenciales
+api-test.http
+.env

@@ -1,0 +1,122 @@
+services:
+  # Auth Service - PostgreSQL
+  postgresAuth:
+    image: postgres:16-alpine
+    container_name: veranoperfecto-auth-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: auth_db
+      POSTGRES_USER: auth_user
+      POSTGRES_PASSWORD: auth_pass
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_auth_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U auth_user -d auth_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Cliente Service - PostgreSQL
+  postgresCliente:
+    image: postgres:16-alpine
+    container_name: veranoperfecto-cliente-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: cliente_db
+      POSTGRES_USER: cliente_user
+      POSTGRES_PASSWORD: cliente_pass
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_cliente_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cliente_user -d cliente_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Mantencion Service - PostgreSQL
+  postgresMantencion:
+    image: postgres:16-alpine
+    container_name: veranoperfecto-mantencion-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: mantencion_db
+      POSTGRES_USER: mantencion_user
+      POSTGRES_PASSWORD: mantencion_pass
+    ports:
+      - "5435:5432"
+    volumes:
+      - postgres_mantencion_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mantencion_user -d mantencion_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Venta Service - PostgreSQL
+  postgresVenta:
+    image: postgres:16-alpine
+    container_name: veranoperfecto-venta-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: venta_db
+      POSTGRES_USER: venta_user
+      POSTGRES_PASSWORD: venta_pass
+    ports:
+      - "5436:5432"
+    volumes:
+      - postgres_venta_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U venta_user -d venta_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Ruta Service - PostgreSQL
+  postgresRuta:
+    image: postgres:16-alpine
+    container_name: veranoperfecto-ruta-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ruta_db
+      POSTGRES_USER: ruta_user
+      POSTGRES_PASSWORD: ruta_pass
+    ports:
+      - "5437:5432"
+    volumes:
+      - postgres_ruta_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ruta_user -d ruta_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Dashboard Service - PostgreSQL
+  postgresDashboard:
+    image: postgres:16-alpine
+    container_name: veranoperfecto-dashboard-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: dashboard_db
+      POSTGRES_USER: dashboard_user
+      POSTGRES_PASSWORD: dashboard_pass
+    ports:
+      - "5438:5432"
+    volumes:
+      - postgres_dashboard_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dashboard_user -d dashboard_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_auth_data:
+  postgres_cliente_data:
+  postgres_mantencion_data:
+  postgres_venta_data:
+  postgres_ruta_data:
+  postgres_dashboard_data:

@@ -1,0 +1,21 @@
+services:
+  postgresVenta:
+    image: postgres:16-alpine
+    container_name: veranoperfecto-venta-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: venta_db
+      POSTGRES_USER: venta_user
+      POSTGRES_PASSWORD: venta_pass
+    ports:
+      - "5436:5432"
+    volumes:
+      - postgres_venta_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U venta_user -d venta_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_venta_data:
