@@ -18,7 +18,7 @@ import com.veranoperfecto.ruta.repository.TecnicoRepository;
 @Service
 public class TecnicoService {
 
-    private static final Set<String> ESTADOS_VALIDOS = Set.of("Disponible", "En Ruta", "En Mantención");
+    private static final Set<String> ESTADOS_VALIDOS = Set.of("Disponible", "En Ruta");
 
     private final TecnicoRepository tecnicoRepository;
 

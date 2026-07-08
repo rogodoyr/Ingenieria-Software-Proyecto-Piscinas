@@ -6,8 +6,6 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
-// Fix leaflet icon paths if using default icons, but we will use divIcons anyway.
-
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 // Coord central de despacho
@@ -56,13 +54,16 @@ const COMUNAS_COORDS = {
   'san ramón': { lat: -33.535, lng: -70.644 },
   'san ramon': { lat: -33.535, lng: -70.644 },
   'san bernardo': { lat: -33.592, lng: -70.699 },
-  // Default bounds fallback
 };
+
+const COMUNAS_LISTA = Object.keys(COMUNAS_COORDS).filter((item, index, arr) => 
+  // Filtrar acentos duplicados para la UI
+  !['maipu', 'peñalolen', 'conchali', 'estacion central', 'san joaquin', 'san ramon'].includes(item)
+).sort();
 
 const ESTADO_COLORS = {
   DISPONIBLE:   { dot: '#3b82f6', ring: 'rgba(59,130,246,0.35)',  badge: '#3b82f6',  badgeBg: 'rgba(59,130,246,0.14)'  },
-  EN_RUTA:      { dot: '#22d3ee', ring: 'rgba(6,182,212,0.4)',    badge: '#22d3ee',  badgeBg: 'rgba(6,182,212,0.14)'   },
-  EN_MANTENCION:{ dot: '#fb923c', ring: 'rgba(249,115,22,0.35)',  badge: '#fb923c',  badgeBg: 'rgba(249,115,22,0.14)'  },
+  EN_RUTA:      { dot: '#22d3ee', ring: 'rgba(6,182,212,0.4)',    badge: '#22d3ee',  badgeBg: 'rgba(6,182,212,0.14)'   }
 };
 
 function getEstadoStyle(estado) {
@@ -81,7 +82,6 @@ function normalizeStr(str) {
 
 // ─── Map Helpers ─────────────────────────────────────────────────────────────
 
-// Creates a custom DivIcon mimicking our old CSS
 function createCustomIcon(tecnico, isSelected) {
   const estado = tecnico.estado || 'DISPONIBLE';
   const sc = getEstadoStyle(estado);
@@ -97,7 +97,7 @@ function createCustomIcon(tecnico, isSelected) {
     <div style="position: relative; display: flex; flex-direction: column; items-align: center; justify-content: center; width: 100%; height: 100%;">
       ${pulseHtml}
       <div style="width: ${size}px; height: ${size}px; border-radius: 50%; background: ${sc.dot}; border: ${isSelected ? '3px solid white' : `2px solid ${sc.ring}`}; box-shadow: ${isSelected ? `0 0 12px ${sc.dot}` : `0 0 6px ${sc.ring}`}; position: relative; z-index: 1; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; color: #fff;">
-         ${estado === 'EN_MANTENCION' ? '🔧' : (estado === 'EN_RUTA' ? '➤' : '')}
+         ${estado === 'EN_RUTA' ? '➤' : ''}
       </div>
       <div style="position: absolute; top: ${size + 4}px; left: 50%; transform: translateX(-50%); background: rgba(15,23,42,0.85); border: 1px solid ${sc.dot}44; border-radius: 5px; padding: 2px 6px; font-size: 0.65rem; color: ${sc.dot}; font-weight: 700; white-space: nowrap; backdrop-filter: blur(4px);">
         ${tecnico.nombre?.split(' ')[0] || 'Téc'}
@@ -107,31 +107,110 @@ function createCustomIcon(tecnico, isSelected) {
 
   return L.divIcon({
     html,
-    className: '', // Removes default leaflet styling
+    className: '', 
     iconSize: [size, size],
     iconAnchor: [size / 2, size / 2],
     popupAnchor: [0, -size/2],
   });
 }
 
+// ─── Asignar Ruta Modal ──────────────────────────────────────────────────────
+
+function AsignarRutaModal({ onClose, tecnicos, onAsignar }) {
+  const [techId, setTechId] = useState('');
+  const [comuna, setComuna] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!techId || !comuna) {
+      alert('Por favor selecciona un técnico y una comuna de destino.');
+      return;
+    }
+    setLoading(true);
+    await onAsignar(techId, comuna);
+    setLoading(false);
+  };
+
+  return (
+    <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+      <div className="bg-surface border border-outline/20 rounded-2xl w-full max-w-sm shadow-2xl pool-glow flex flex-col">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-outline/20 shrink-0">
+          <h2 className="text-primary font-bold text-lg">📍 Asignar / Reasignar Ruta</h2>
+          <button onClick={onClose} className="text-secondary hover:text-primary text-2xl leading-none transition-colors">×</button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="px-6 py-5 flex flex-col gap-4">
+          <div className="flex flex-col gap-1">
+            <label className="text-secondary text-xs font-medium uppercase tracking-wide">Técnico</label>
+            <select
+              value={techId}
+              onChange={(e) => setTechId(e.target.value)}
+              required
+              className="bg-surface-high border border-outline/20 text-primary rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary/60"
+            >
+              <option value="">-- Seleccionar --</option>
+              {tecnicos.map(t => (
+                <option key={t.id || t._id} value={t.id || t._id}>{t.nombre} ({t.estadoSeguro?.replace('_', ' ')})</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <label className="text-secondary text-xs font-medium uppercase tracking-wide">Comuna de Destino</label>
+            <select
+              value={comuna}
+              onChange={(e) => setComuna(e.target.value)}
+              required
+              className="bg-surface-high border border-outline/20 text-primary rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary/60"
+            >
+              <option value="">-- Seleccionar Comuna --</option>
+              {COMUNAS_LISTA.map(c => (
+                <option key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>
+              ))}
+            </select>
+          </div>
+        </form>
+
+        <div className="px-6 py-4 border-t border-outline/20 shrink-0 flex gap-3">
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex-1 border border-outline/20 text-secondary py-2.5 rounded-xl text-sm font-medium hover:bg-surface-high transition-colors"
+          >
+            Cancelar
+          </button>
+          <button
+            onClick={handleSubmit}
+            disabled={loading}
+            className="flex-1 bg-primary-container text-primary py-2.5 rounded-xl text-sm font-bold hover:opacity-90 transition-opacity disabled:opacity-50"
+          >
+            {loading ? 'Asignando…' : 'Asignar'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Technician card (left panel) ─────────────────────────────────────────────
 
-function TechCard({ tecnico, isSelected, mantenciones, onSelect, onDespachar, onLiberar }) {
+function TechCard({ tecnico, isSelected, mantenciones, onSelect, onDespachar, onLiberar, onLlegada }) {
   const estado = tecnico.estado || 'DISPONIBLE';
   const sc = getEstadoStyle(estado);
   const id = tecnico._id || tecnico.id;
 
-  const activaOT = (estado === 'EN_MANTENCION' || estado === 'EN_RUTA')
+  const activaOT = estado === 'EN_RUTA'
     ? mantenciones.find((m) => {
         const techId = m.tecnico?._id || m.tecnico?.id || m.tecnicoId;
-        return techId === id && (m.estado === 'EN_CURSO' || m.estado === 'PENDIENTE' /* If they are dispatched for a pending one */);
+        return techId === id && (m.estado === 'EN_CURSO' || m.estado === 'PENDIENTE');
       })
     : null;
 
   return (
     <div
       onClick={() => onSelect(id)}
-      className="bg-surface-high border border-outline/20"
+      className="bg-surface-high border border-outline/20 hover:bg-surface/50"
       style={{
         borderRadius: 10,
         padding: '12px 14px',
@@ -181,7 +260,7 @@ function TechCard({ tecnico, isSelected, mantenciones, onSelect, onDespachar, on
       )}
 
       {/* OT info */}
-      {(estado === 'EN_MANTENCION' || estado === 'EN_RUTA') && activaOT && (
+      {estado === 'EN_RUTA' && activaOT && (
         <div style={{ fontSize: '0.72rem', color: '#fb923c', background: 'rgba(249,115,22,0.08)', border: '1px solid rgba(249,115,22,0.2)', borderRadius: 6, padding: '5px 8px', marginTop: 4 }}>
           <div>🔧 OT #{(activaOT._id || activaOT.id || '').slice(0, 8)}</div>
           <div style={{ color: '#fdba74', marginTop: 2, fontWeight: 600 }}>{activaOT.cliente?.nombre || activaOT.clienteNombre || 'Cliente'}</div>
@@ -201,7 +280,7 @@ function TechCard({ tecnico, isSelected, mantenciones, onSelect, onDespachar, on
             🚀 Despachar
           </button>
         )}
-        {(estado === 'EN_RUTA' || estado === 'EN_MANTENCION') && (
+        {estado === 'EN_RUTA' && (
           <button
             onClick={(e) => { e.stopPropagation(); onLiberar(id); }}
             style={{ flex: 1, padding: '6px 0', borderRadius: 7, background: 'rgba(148,163,184,0.1)', border: '1px solid rgba(148,163,184,0.25)', color: '#94a3b8', cursor: 'pointer', fontWeight: 600, fontSize: '0.78rem' }}
@@ -235,6 +314,11 @@ export default function Rutas() {
   const [error, setError] = useState(null);
   const [selectedTechId, setSelectedTechId] = useState(null);
   const [currentTime, setCurrentTime] = useState(new Date());
+  
+  // States for new functionality
+  const [filtroEstado, setFiltroEstado] = useState(null); // null, DISPONIBLE, EN_RUTA
+  const [modalAsignar, setModalAsignar] = useState(false);
+
   const intervalRef = useRef(null);
 
   // ─ Load ─
@@ -262,17 +346,21 @@ export default function Rutas() {
   }, [token]);
 
   // ─ Counts ─
-  const getEstadoSeguro = (t) => t.estado ? t.estado.toUpperCase() : 'DISPONIBLE';
+  const getEstadoSeguro = (t) => {
+    if (!t.estado) return 'DISPONIBLE';
+    const e = t.estado.toUpperCase();
+    if (e === 'EN RUTA' || e === 'EN_RUTA') return 'EN_RUTA';
+    return e;
+  };
   const counts = {
     disponible:    tecnicos.filter((t) => getEstadoSeguro(t) === 'DISPONIBLE').length,
-    en_ruta:       tecnicos.filter((t) => getEstadoSeguro(t) === 'EN_RUTA').length,
-    en_mantencion: tecnicos.filter((t) => getEstadoSeguro(t) === 'EN_MANTENCION').length,
+    en_ruta:       tecnicos.filter((t) => getEstadoSeguro(t) === 'EN_RUTA').length
   };
 
   // ─ Calc Real Coords for Tech ─
   const getTechCoords = (t) => {
     const estado = getEstadoSeguro(t);
-    // Si esta disponible, intentar usar su propia comuna, o dispersarlos más
+    // Si esta disponible, usar su comuna o dispersar
     if (estado === 'DISPONIBLE') {
       const comunaPropia = t.comuna || (t.direccion && t.direccion.includes(',') ? t.direccion.split(',')[1] : null);
       if (comunaPropia) {
@@ -284,8 +372,6 @@ export default function Rutas() {
         }
       }
       
-      // Si no tienen comuna registrada, esparcirlos visualmente alrededor de todo el perímetro de Santiago
-      // Multiplicador 0.06 equivale a unos ~6 kilómetros de distancia desde el centro
       const jitterLat = (Math.random() - 0.5) * 0.06;
       const jitterLng = (Math.random() - 0.5) * 0.06;
       return { lat: DESPACHO_COORDS.lat + jitterLat, lng: DESPACHO_COORDS.lng + jitterLng };
@@ -318,8 +404,13 @@ export default function Rutas() {
   // Pre-calculate coords
   const techLocations = tecnicos.map(t => ({
     ...t,
+    estadoSeguro: getEstadoSeguro(t),
     coords: getTechCoords(t)
   }));
+
+  const filteredTechs = filtroEstado 
+    ? techLocations.filter(t => t.estadoSeguro === filtroEstado)
+    : techLocations;
 
   const selectedTechCoords = selectedTechId 
     ? techLocations.find(t => (t._id || t.id) === selectedTechId)?.coords 
@@ -328,10 +419,10 @@ export default function Rutas() {
   // ─ Actions ─
   const handleDespachar = async (id) => {
     try {
-      await cambiarEstadoTecnico(token, id, 'EN_RUTA');
+      await cambiarEstadoTecnico(token, id, 'En Ruta');
       const tData = techLocations.find((t) => (t._id || t.id) === id);
       if (tData) {
-         await actualizarUbicacion(token, id, { lat: tData.coords.lat, lng: tData.coords.lng });
+         await actualizarUbicacion(token, id, tData.coords.lat, tData.coords.lng);
       }
       await loadData();
     } catch (err) {
@@ -341,16 +432,39 @@ export default function Rutas() {
 
   const handleLiberar = async (id) => {
     try {
-      await cambiarEstadoTecnico(token, id, 'DISPONIBLE');
-      await actualizarUbicacion(token, id, { lat: DESPACHO_COORDS.lat, lng: DESPACHO_COORDS.lng });
+      await cambiarEstadoTecnico(token, id, 'Disponible');
+      await actualizarUbicacion(token, id, DESPACHO_COORDS.lat, DESPACHO_COORDS.lng);
       await loadData();
     } catch (err) {
       alert(err?.message || 'Error al liberar técnico');
     }
   };
 
+  const handleAsignarManual = async (techId, comunaNombre) => {
+    const key = normalizeStr(comunaNombre);
+    const coords = COMUNAS_COORDS[key] || DESPACHO_COORDS;
+    
+    // Add jitter so they don't land exactly on top of each other
+    const jitterLat = (Math.random() - 0.5) * 0.005;
+    const jitterLng = (Math.random() - 0.5) * 0.005;
+    
+    try {
+      await cambiarEstadoTecnico(token, techId, 'En Ruta');
+      await actualizarUbicacion(token, techId, coords.lat + jitterLat, coords.lng + jitterLng);
+      setModalAsignar(false);
+      await loadData();
+      setSelectedTechId(techId); // Auto-focus in map
+    } catch (err) {
+      alert(err?.message || 'Error asignando la ruta manualmente');
+    }
+  };
+
+  const handleFiltroClick = (estado) => {
+    setFiltroEstado(prev => prev === estado ? null : estado);
+  };
+
   // ─ Loading ─
-  if (loading) {
+  if (loading && tecnicos.length === 0) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh', gap: 12 }}>
         <div style={{ width: 28, height: 28, border: '3px solid rgba(6,182,212,0.3)', borderTopColor: '#22d3ee', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
@@ -387,6 +501,15 @@ export default function Rutas() {
         }
       `}</style>
 
+      {/* Modals */}
+      {modalAsignar && (
+        <AsignarRutaModal 
+          onClose={() => setModalAsignar(false)} 
+          tecnicos={techLocations}
+          onAsignar={handleAsignarManual}
+        />
+      )}
+
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>
@@ -397,12 +520,20 @@ export default function Rutas() {
             Localización GPS y gestión en tiempo real
           </p>
         </div>
-        <button
-          onClick={loadData}
-          style={{ padding: '7px 16px', background: 'rgba(6,182,212,0.1)', border: '1px solid rgba(6,182,212,0.3)', color: '#22d3ee', borderRadius: 8, cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600 }}
-        >
-          ↺ Actualizar Mapas
-        </button>
+        <div style={{ display: 'flex', gap: 10 }}>
+          <button
+            onClick={() => setModalAsignar(true)}
+            className="bg-primary-container text-primary font-semibold px-4 py-2 rounded-xl text-sm hover:opacity-90 transition-all pool-glow"
+          >
+            📍 Asignar Ruta Manual
+          </button>
+          <button
+            onClick={loadData}
+            style={{ padding: '7px 16px', background: 'rgba(6,182,212,0.1)', border: '1px solid rgba(6,182,212,0.3)', color: '#22d3ee', borderRadius: 8, cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600 }}
+          >
+            ↺ Actualizar Mapas
+          </button>
+        </div>
       </div>
 
       {/* Main layout */}
@@ -415,36 +546,43 @@ export default function Rutas() {
             className="bg-surface border border-outline/20"
             style={{ borderRadius: 12, padding: '14px 16px' }}
           >
-            <div className="text-primary" style={{ fontWeight: 700, fontSize: '1rem', marginBottom: 4 }}>
-              🏢 Centro de Despacho
+            <div className="text-primary flex justify-between items-center" style={{ fontWeight: 700, fontSize: '1rem', marginBottom: 4 }}>
+              <span>🏢 Centro de Despacho</span>
+              {filtroEstado && (
+                <button onClick={() => setFiltroEstado(null)} className="text-xs text-secondary hover:text-primary underline">
+                  Quitar filtro
+                </button>
+              )}
             </div>
             <div className="text-secondary" style={{ fontSize: '0.78rem', marginBottom: 14 }}>
               Base Operaciones (Santiago)
             </div>
             <div style={{ display: 'flex', gap: 10 }}>
-              <div style={{ flex: 1, background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.25)', borderRadius: 8, padding: '8px 10px', textAlign: 'center' }}>
+              <div 
+                onClick={() => handleFiltroClick('DISPONIBLE')}
+                style={{ flex: 1, background: 'rgba(59,130,246,0.1)', border: filtroEstado === 'DISPONIBLE' ? '1px solid #60a5fa' : '1px solid rgba(59,130,246,0.25)', borderRadius: 8, padding: '8px 10px', textAlign: 'center', cursor: 'pointer', opacity: filtroEstado && filtroEstado !== 'DISPONIBLE' ? 0.4 : 1, transition: 'all 0.2s' }}
+              >
                 <div style={{ fontSize: '1.3rem', fontWeight: 800, color: '#60a5fa' }}>{counts.disponible}</div>
                 <div style={{ fontSize: '0.65rem', color: '#60a5fa', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Disponible</div>
               </div>
-              <div style={{ flex: 1, background: 'rgba(6,182,212,0.1)', border: '1px solid rgba(6,182,212,0.25)', borderRadius: 8, padding: '8px 10px', textAlign: 'center' }}>
+              <div 
+                onClick={() => handleFiltroClick('EN_RUTA')}
+                style={{ flex: 1, background: 'rgba(6,182,212,0.1)', border: filtroEstado === 'EN_RUTA' ? '1px solid #22d3ee' : '1px solid rgba(6,182,212,0.25)', borderRadius: 8, padding: '8px 10px', textAlign: 'center', cursor: 'pointer', opacity: filtroEstado && filtroEstado !== 'EN_RUTA' ? 0.4 : 1, transition: 'all 0.2s' }}
+              >
                 <div style={{ fontSize: '1.3rem', fontWeight: 800, color: '#22d3ee' }}>{counts.en_ruta}</div>
                 <div style={{ fontSize: '0.65rem', color: '#22d3ee', textTransform: 'uppercase', letterSpacing: '0.04em' }}>En Ruta</div>
-              </div>
-              <div style={{ flex: 1, background: 'rgba(249,115,22,0.1)', border: '1px solid rgba(249,115,22,0.25)', borderRadius: 8, padding: '8px 10px', textAlign: 'center' }}>
-                <div style={{ fontSize: '1.3rem', fontWeight: 800, color: '#fb923c' }}>{counts.en_mantencion}</div>
-                <div style={{ fontSize: '0.65rem', color: '#fb923c', textTransform: 'uppercase', letterSpacing: '0.04em' }}>En Mantención</div>
               </div>
             </div>
           </div>
 
           {/* Technician list */}
           <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 10, paddingRight: 4 }} className="custom-scrollbar">
-            {techLocations.length === 0 && (
+            {filteredTechs.length === 0 && (
               <div className="text-secondary" style={{ textAlign: 'center', padding: 30, opacity: 0.5, fontSize: '0.85rem' }}>
-                Sin técnicos registrados
+                {techLocations.length === 0 ? 'Sin técnicos registrados' : 'Ningún técnico coincide con este filtro'}
               </div>
             )}
-            {techLocations.map((t) => (
+            {filteredTechs.map((t) => (
               <TechCard
                 key={t._id || t.id}
                 tecnico={t}
@@ -495,9 +633,9 @@ export default function Rutas() {
               </Marker>
 
               {/* Technicians Markers */}
-              {techLocations.map(t => {
+              {filteredTechs.map(t => {
                 const isSelected = selectedTechId === (t._id || t.id);
-                const activaOT = (t.estado === 'EN_MANTENCION' || t.estado === 'EN_RUTA')
+                const activaOT = t.estadoSeguro === 'EN_RUTA'
                   ? mantenciones.find((m) => {
                       const techId = m.tecnico?._id || m.tecnico?.id || m.tecnicoId;
                       return techId === (t._id || t.id) && (m.estado === 'EN_CURSO' || m.estado === 'PENDIENTE');
@@ -521,7 +659,7 @@ export default function Rutas() {
                   >
                     <Popup autoPan={false}>
                        <b style={{ color: '#0f172a' }}>{t.nombre}</b><br/>
-                       Estado: {t.estado?.replace('_', ' ')}<br/>
+                       Estado: {t.estadoSeguro?.replace('_', ' ')}<br/>
                        {activaOT && (
                          <div style={{ marginTop: 4, padding: 4, background: '#f1f5f9', borderRadius: 4, fontSize: '0.8rem', color: '#334155' }}>
                            <b>OT #{(activaOT._id || activaOT.id || '').slice(0, 8)}</b><br/>
