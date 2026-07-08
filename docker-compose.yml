@@ -12,6 +12,7 @@ services:
       - "5433:5432"
     volumes:
       - postgres_auth_data:/var/lib/postgresql/data
+      - ./init-db/auth:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U auth_user -d auth_db"]
       interval: 10s
@@ -31,6 +32,7 @@ services:
       - "5434:5432"
     volumes:
       - postgres_cliente_data:/var/lib/postgresql/data
+      - ./init-db/cliente:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U cliente_user -d cliente_db"]
       interval: 10s
@@ -50,6 +52,7 @@ services:
       - "5435:5432"
     volumes:
       - postgres_mantencion_data:/var/lib/postgresql/data
+      - ./init-db/mantencion:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U mantencion_user -d mantencion_db"]
       interval: 10s
@@ -69,6 +72,7 @@ services:
       - "5436:5432"
     volumes:
       - postgres_venta_data:/var/lib/postgresql/data
+      - ./init-db/venta:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U venta_user -d venta_db"]
       interval: 10s
@@ -88,6 +92,7 @@ services:
       - "5437:5432"
     volumes:
       - postgres_ruta_data:/var/lib/postgresql/data
+      - ./init-db/ruta:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ruta_user -d ruta_db"]
       interval: 10s
@@ -107,6 +112,7 @@ services:
       - "5438:5432"
     volumes:
       - postgres_dashboard_data:/var/lib/postgresql/data
+      - ./init-db/dashboard:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U dashboard_user -d dashboard_db"]
       interval: 10s

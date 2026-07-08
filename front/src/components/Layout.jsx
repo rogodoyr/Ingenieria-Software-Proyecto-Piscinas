@@ -4,12 +4,15 @@ export default function Layout({ children, activeMenu, onMenuClick }) {
   const { user, logout } = useAuth();
 
   const menuItems = [
-    { name: 'Dashboard' },
-    { name: 'Clientes' },
-    { name: 'Mantenciones' },
-    { name: 'Ventas y Facturación' },
-    { name: 'Rutas' },
-  ];
+    { name: 'Dashboard', roles: ['ADMIN', 'SUPERVISOR', 'VENTAS', 'OPERADOR'] },
+    { name: 'Clientes', roles: ['ADMIN', 'SUPERVISOR', 'VENTAS'] },
+    { name: 'Mantenciones', roles: ['ADMIN', 'SUPERVISOR'] },
+    { name: 'Ventas y Facturación', roles: ['ADMIN', 'VENTAS'] },
+    { name: 'Rutas', roles: ['ADMIN', 'SUPERVISOR'] },
+  ].filter(item => {
+    const userRole = user?.rol?.toUpperCase() || 'OPERADOR';
+    return item.roles.includes(userRole);
+  });
 
   return (
     <div className="flex h-screen w-full bg-background font-sans overflow-hidden">

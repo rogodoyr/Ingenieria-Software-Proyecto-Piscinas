@@ -31,25 +31,38 @@ async function seed() {
   console.log('\x1b[1m\x1b[35m══════════════════════════════════════════\x1b[0m\n');
 
   // ── 1. Registrar usuario admin ──────────────────────────
-  console.log(INF('1/6  Creando usuario admin...'));
-  const regRes = await post(`${AUTH}/register`, {
-    username: 'admin',
-    password: 'admin123',
-    nombre:   'Administrador Demo',
-    email:    'admin@veranoperfecto.cl'
-  });
+  const usersToCreate = [
+    { username: 'admin', password: 'admin123', nombre: 'Administrador Demo', email: 'admin@veranoperfecto.cl', rol: 'ADMIN' },
+    { username: 'supervisor', password: 'super123', nombre: 'Supervisor Rutas', email: 'supervisor@veranoperfecto.cl', rol: 'SUPERVISOR' },
+    { username: 'ventas', password: 'ventas123', nombre: 'Ejecutivo Ventas', email: 'ventas@veranoperfecto.cl', rol: 'VENTAS' }
+  ];
 
-  let token = regRes.data?.token;
-  if (!token) {
-    // Ya existe, hacemos login
-    const loginRes = await post(`${AUTH}/login`, { username: 'admin', password: 'admin123' });
-    token = loginRes.data?.token;
-    if (!token) { console.log(ERR('No se pudo obtener token. ¿Están los servicios corriendo?')); process.exit(1); }
-    console.log(OK('Login con admin existente'));
-  } else {
-    console.log(OK('Usuario admin creado'));
+  let adminToken = null;
+
+  for (const u of usersToCreate) {
+    const regRes = await post(`${AUTH}/register`, u);
+    let token = regRes.data?.token;
+    
+    if (!token) {
+      // Ya existe, hacemos login
+      const loginRes = await post(`${AUTH}/login`, { username: u.username, password: u.password });
+      token = loginRes.data?.token;
+      if (!token) { 
+        console.log(ERR(`No se pudo obtener token para ${u.username}. ¿Están los servicios corriendo?`)); 
+        process.exit(1); 
+      }
+      console.log(OK(`Login con usuario existente: ${u.username}`));
+    } else {
+      console.log(OK(`Usuario creado: ${u.username} (${u.rol})`));
+    }
+
+    if (u.username === 'admin') {
+      adminToken = token;
+    }
   }
-  console.log(`   Token: ${token.substring(0,30)}...\n`);
+  
+  const token = adminToken;
+  console.log(`   Admin Token: ${token.substring(0,30)}...\n`);
 
   // ── 2. Clientes ─────────────────────────────────────────
   console.log(INF('2/6  Creando clientes...'));

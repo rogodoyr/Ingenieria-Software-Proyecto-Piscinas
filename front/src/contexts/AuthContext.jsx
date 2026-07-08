@@ -39,10 +39,10 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const register = async (username, password, nombre, email) => {
+  const register = async (username, password, nombre, email, rol) => {
     setLoading(true);
     try {
-      const data = await apiRegister(username, password, nombre, email);
+      const data = await apiRegister(username, password, nombre, email, rol);
       setToken(data.token);
       setUser({ username: data.username, nombre: data.nombre, rol: data.rol });
       return data;

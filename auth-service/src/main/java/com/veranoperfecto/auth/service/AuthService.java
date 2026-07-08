@@ -50,7 +50,7 @@ public class AuthService {
                 .passwordHash(passwordEncoder.encode(request.password()))
                 .nombre(request.nombre())
                 .email(request.email())
-                .rol("OPERADOR")
+                .rol(request.rol() != null && !request.rol().isBlank() ? request.rol() : "OPERADOR")
                 .build();
 
         User savedUser = userRepository.save(user);

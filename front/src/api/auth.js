@@ -14,11 +14,11 @@ export async function login(username, password) {
   return json.data;
 }
 
-export async function register(username, password, nombre, email) {
+export async function register(username, password, nombre, email, rol) {
   const res = await fetch(`${API_URLS.auth}/register`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username, password, nombre, email }),
+    body: JSON.stringify({ username, password, nombre, email, rol }),
   });
   const json = await res.json();
   if (!json.success) throw new Error(json.error?.message || 'Error de registro');
