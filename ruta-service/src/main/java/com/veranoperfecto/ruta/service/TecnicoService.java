@@ -82,6 +82,12 @@ public class TecnicoService {
         return toDto(tecnico);
     }
 
+    public void deleteTecnico(UUID id) {
+        Tecnico tecnico = tecnicoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Técnico no encontrado con ID: " + id));
+        tecnicoRepository.delete(tecnico);
+    }
+
     private TecnicoDto toDto(Tecnico tecnico) {
         return new TecnicoDto(
                 tecnico.getId(),

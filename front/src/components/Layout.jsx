@@ -6,6 +6,7 @@ export default function Layout({ children, activeMenu, onMenuClick }) {
   const menuItems = [
     { name: 'Dashboard', roles: ['ADMIN', 'SUPERVISOR', 'VENTAS', 'OPERADOR'] },
     { name: 'Clientes', roles: ['ADMIN', 'SUPERVISOR', 'VENTAS'] },
+    { name: 'Técnicos', roles: ['ADMIN'] },
     { name: 'Mantenciones', roles: ['ADMIN', 'SUPERVISOR'] },
     { name: 'Ventas y Facturación', roles: ['ADMIN', 'VENTAS'] },
     { name: 'Rutas', roles: ['ADMIN', 'SUPERVISOR'] },

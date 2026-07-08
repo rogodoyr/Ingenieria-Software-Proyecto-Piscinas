@@ -7,6 +7,7 @@ import Clientes from './pages/Clientes';
 import Mantenciones from './pages/Mantenciones';
 import Ventas from './pages/Ventas';
 import Rutas from './pages/Rutas';
+import Tecnicos from './pages/Tecnicos';
 
 function AppContent() {
   const { isAuthenticated } = useAuth();
@@ -20,6 +21,7 @@ function AppContent() {
     switch (vistaActual) {
       case 'Dashboard': return <Dashboard onNavigate={setVistaActual} />;
       case 'Clientes': return <Clientes />;
+      case 'Técnicos': return <Tecnicos />;
       case 'Mantenciones': return <Mantenciones />;
       case 'Ventas y Facturación': return <Ventas />;
       case 'Rutas': return <Rutas />;

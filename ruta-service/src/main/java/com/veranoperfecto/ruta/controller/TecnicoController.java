@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.DeleteMapping;
 
 import com.veranoperfecto.ruta.dto.ApiResponse;
 import com.veranoperfecto.ruta.dto.CambioEstadoTecnicoDto;
@@ -65,5 +66,11 @@ public class TecnicoController {
             @Valid @RequestBody CambioEstadoTecnicoDto cambioEstadoDto) {
         TecnicoDto tecnico = tecnicoService.cambiarEstado(id, cambioEstadoDto);
         return ResponseEntity.ok(ApiResponse.success(tecnico));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Void>> deleteTecnico(@PathVariable UUID id) {
+        tecnicoService.deleteTecnico(id);
+        return ResponseEntity.ok(ApiResponse.success(null));
     }
 }

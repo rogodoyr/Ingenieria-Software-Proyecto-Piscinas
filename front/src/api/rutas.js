@@ -58,6 +58,16 @@ export async function cambiarEstadoTecnico(token, id, estado) {
   return json.data;
 }
 
+export async function deleteTecnico(token, id) {
+  const res = await fetch(`${API_URLS.tecnicos}/${id}`, {
+    method: 'DELETE',
+    headers: getAuthHeaders(token),
+  });
+  const json = await res.json();
+  if (!json.success) throw new Error(json.error?.message || 'Error eliminando técnico');
+  return json.data;
+}
+
 export async function getRutas(token) {
   const res = await fetch(API_URLS.rutas, { headers: getAuthHeaders(token) });
   const json = await res.json();
