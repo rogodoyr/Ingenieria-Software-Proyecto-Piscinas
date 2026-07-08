@@ -1,15 +1,62 @@
-# Ocultar configuraciones del IDE
+# Build y Compilados
+build/
+bin/
+out/
+target/
+*.class
+
+# Gradle
+.gradle/
+!gradle/wrapper/gradle-wrapper.jar
+
+# Node / Vite
+node_modules/
+dist/
+coverage/
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Variables de Entorno
+.env
+.env.*
+!.env.example
+
+# Logs
+logs/
+*.log
+hs_err_pid*
+replay_pid*
+
+# IDEs - IntelliJ
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# IDEs - Eclipse / STS
+.project
+.classpath
+.settings/
+.factorypath
+.apt_generated/
+.springBeans
+.sts4-cache/
+
+# IDEs - VS Code
 .vscode/
 *.code-workspace
 
-# Ocultar dependencias pesadas y binarios
-node_modules/
-.gradle-bin/
-.gradle-bin-new/
-.gradle/
-build/
-target/
+# IDEs - NetBeans
+/nbproject/private/
+/nbbuild/
+/nbdist/
+/.nb-gradle/
 
-# Ocultar pruebas locales y credenciales
-api-test.http
-.env
+# Sistema Operativo y Temporales
+*.tmp
+*.swp
+*~
+.DS_Store
+Thumbs.db
+Desktop.ini
