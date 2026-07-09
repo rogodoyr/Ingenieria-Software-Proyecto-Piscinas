@@ -51,7 +51,16 @@ Especialista enfocado puramente en la atención comercial y facturación.
 
 ---
 
-## 🏗️ 3. Resumen de la Arquitectura (Microservicios)
+## 💾 3. Poblamiento de Datos y Cuentas por Defecto (Seed)
+
+Para facilitar la demostración de la plataforma en entornos limpios o después de clonar el repositorio, se ha implementado un script de inicialización (`seed-demo.js`).
+
+* **Propósito:** Inyectar datos de prueba realistas (clientes, órdenes, ventas) y generar las cuentas de acceso iniciales pre-configuradas con sus respectivos roles (ADMIN, SUPERVISOR, VENTAS) con contraseñas encriptadas.
+* **Uso Obligatorio:** Es estrictamente necesario que, tras levantar los contenedores Docker y ejecutar los microservicios con Gradle, se ejecute este script (`node seed-demo.js`). Solo así el sistema quedará poblado, habilitando el acceso seguro al ERP sin necesidad de hacer registros manuales.
+
+---
+
+## 🏗️ 4. Resumen de la Arquitectura (Microservicios)
 
 La plataforma ha abandonado la arquitectura monolítica tradicional en favor de un sistema distribuido altamente escalable. Cada dominio cuenta con su propia base de datos, garantizando aislamiento y tolerancia a fallos.
 
