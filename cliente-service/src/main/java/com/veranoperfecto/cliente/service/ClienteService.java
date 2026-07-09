@@ -20,6 +20,7 @@ import java.util.UUID;
 public class ClienteService {
 
     private final ClienteRepository clienteRepository;
+    private final TelegramNotificationService telegramNotificationService;
 
     @Transactional(readOnly = true)
     public List<ClienteDto> getAllClientes() {
@@ -94,6 +95,10 @@ public class ClienteService {
 
         Cliente saved = clienteRepository.save(cliente);
         log.debug("Cliente created successfully with codigo: {}", saved.getCodigo());
+        
+        // Enviar notificación a Telegram
+        telegramNotificationService.enviarNotificacionNuevaCotizacion(saved);
+        
         return toDto(saved);
     }
 

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Login from './pages/Login';
 import Layout from './components/Layout';
@@ -10,8 +10,18 @@ import Rutas from './pages/Rutas';
 import Tecnicos from './pages/Tecnicos';
 
 function AppContent() {
-  const { isAuthenticated } = useAuth();
-  const [vistaActual, setVistaActual] = useState('Dashboard');
+  const { isAuthenticated, user } = useAuth();
+  const [vistaActual, setVistaActual] = useState(null);
+
+  useEffect(() => {
+    if (user && !vistaActual) {
+      const role = user.rol?.toUpperCase();
+      if (role === 'ADMIN') setVistaActual('Dashboard');
+      else if (role === 'SUPERVISOR') setVistaActual('Mantenciones');
+      else if (role === 'VENTAS') setVistaActual('Ventas y Facturación');
+      else setVistaActual('Clientes');
+    }
+  }, [user, vistaActual]);
 
   if (!isAuthenticated) {
     return <Login />;

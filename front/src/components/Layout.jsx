@@ -4,7 +4,7 @@ export default function Layout({ children, activeMenu, onMenuClick }) {
   const { user, logout } = useAuth();
 
   const menuItems = [
-    { name: 'Dashboard', roles: ['ADMIN', 'SUPERVISOR', 'VENTAS', 'OPERADOR'] },
+    { name: 'Dashboard', roles: ['ADMIN'] },
     { name: 'Clientes', roles: ['ADMIN', 'SUPERVISOR', 'VENTAS'] },
     { name: 'Técnicos', roles: ['ADMIN'] },
     { name: 'Mantenciones', roles: ['ADMIN', 'SUPERVISOR'] },
